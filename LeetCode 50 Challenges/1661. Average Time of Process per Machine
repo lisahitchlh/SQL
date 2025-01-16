@@ -1,0 +1,10 @@
+-- The resulting table should have the machine_id along with the average time as processing_time, which should be rounded to 3 decimal places.
+SELECT st.machine_id, ROUND(AVG(en.timestamp-st.timestamp),3) as processing_time
+FROM Activity as st
+
+JOIN Activity as en
+ON st.machine_id = en.machine_id 
+    AND st.process_id = en.process_id
+
+WHERE st.activity_type = "start" AND en.activity_type = "end"
+GROUP BY st.machine_id

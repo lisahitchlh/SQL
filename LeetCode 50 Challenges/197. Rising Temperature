@@ -1,0 +1,12 @@
+-- Write a solution to find all dates' id with higher temperatures compared to its previous dates (yesterday).
+SELECT id
+FROM (
+    SELECT 
+        id,
+        recordDate,
+        temperature,
+        LAG(temperature) OVER (ORDER BY recordDate) AS previous_temperature
+    FROM 
+        Weather
+) as t
+WHERE temperature > previous_temperature;

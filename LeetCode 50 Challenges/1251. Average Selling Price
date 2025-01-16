@@ -1,0 +1,11 @@
+-Write a solution to find the average selling price for each product. average_price should be rounded to 2 decimal places. If a product does not have any sold units, its average selling price is assumed to be 0.
+
+SELECT p.product_id
+,  COALESCE(ROUND(SUM(p.price * NULLIF(u.units,0))/NULLIF(SUM(u.units),0),2),0) as average_price
+FROM Prices as p
+
+LEFT JOIN UnitsSold as u
+    ON p.product_id = u.product_id
+    AND u.purchase_date BETWEEN p.start_date and p.end_date
+
+GROUP BY 1;
