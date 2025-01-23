@@ -1,0 +1,52 @@
+-- ETC for guards and their assigned rooms
+WITH guard_assignment AS
+(SELECT 
+ 	g.id as guard_id
+ 	, g.code_name
+ 	, g.status
+ 	, r.id as room_id
+ 	, r.floor
+ 	, r.isVacant
+ 	, r.last_check_time
+ FROM guard as g
+ JOIN room as r
+ 	ON r.id = g.assigned_room_id
+),
+
+
+-- ETC to add camera movement to rooms
+camera_movement AS
+(select 
+ 	ga.guard_id
+ 	, ga.code_name
+ 	, ga.status
+ 	, ga.room_id
+ 	, ga.floor
+ 	, ga.isVacant
+ 	, ga.last_check_time	
+ 	, c.id as camera_id
+ 	, c.location
+ 	, c.movement_detected
+ 	, c.guard_spotted_id
+ 	, c.movement_detected_time
+ from guard_assignment as ga
+ LEFT JOIN camera as c
+ ON c.guard_spotted_id = ga.guard_id
+)
+
+
+
+SELECT
+	guard_id as guard_number
+	,code_name
+	,status
+	,last_check_time as last_seen
+	, movement_detected_time as spotted_outside_Time
+	, location as spotted_outside_location
+	, (movement_detected_time-last_check_time) as time_between_room_outside
+	, MAX(movement_detected_time) OVER () - MIN(movement_detected_time) OVER () as time_range
+		
+FROM camera_movement
+
+WHERE movement_detected IS NOT NULL
+ORDER BY guard_number;

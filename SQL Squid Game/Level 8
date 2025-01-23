@@ -1,0 +1,53 @@
+
+/*Find and display the information for the player with the highest hesitation time among
+ those who were pushed off in the game that has the highest average hesitation 
+ time before a push occured.
+Note: I realized that you didn't even need the other table!*/
+
+WITH full_join AS
+(
+SELECT 
+	p.id as player_id
+	,p.first_name
+	,p.last_name
+	,p.game_id
+	,p.survived
+	,p.death_description
+	,p.last_moved_time_seconds
+FROM player as p 
+  ),
+
+-- game with average longest hesitation where someone was pushed > game_id = 50
+hesitation_game AS
+(SELECT 
+ 	game_id
+ 	,AVG(last_moved_time_seconds) as sum_hesitation
+ FROM full_join
+WHERE LOWER(death_description) LIKE '%push%'
+ GROUP BY game_id
+ ORDER BY sum_hesitation DESC
+ LIMIT 1
+),
+
+-- find player with highest hesitation (player_id = 446) 
+-- in game with highest hesitation (game_id = 50)
+hesitation_player AS
+(
+  SELECT
+  f.player_id
+  ,f.game_id
+  , f.first_name
+  , f.last_name
+  , SUM(last_moved_time_seconds) as sum_hesitation_player
+  FROM full_join as f
+  
+  JOIN hesitation_game as h
+  	ON h.game_id = f.game_id
+  
+  WHERE h.game_id = f.game_id
+  GROUP BY f.player_id, f.game_id, f.first_name, f.last_name
+  ORDER BY sum_hesitation_player DESC
+  LIMIT 1
+)
+
+SELECT player_id, first_name, last_name, sum_hesitation_player FROM hesitation_player

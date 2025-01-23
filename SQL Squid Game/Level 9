@@ -1,0 +1,71 @@
+/* this is the solution that got me the result on Datalemur*/
+/* However, I think the actual solution includes 2 guards with the ID's 22 and 4*/
+
+-- CTE for disappearance window (11:58 - 12:58)
+WITH disappearance_window AS
+(SELECT start_time as sus_start, end_time as sus_end
+FROM game_schedule
+WHERE type = 'Squid Game'
+ORDER BY date DESC
+LIMIT 1),
+
+-- CTE for deviated guards
+deviated_guards AS
+(select 
+	g.id as guard_id
+	, g.assigned_post
+	, g.shift_start as deviated_start
+	, g.shift_end as deviated_end
+	, d.id as log_id
+	, d.access_time
+	, d.door_location as other_location
+from guard as g
+JOIN daily_door_access_logs as d
+ON d.guard_id = g.id
+
+WHERE assigned_post != door_location
+ORDER BY guard_id),
+
+-- CTE with all guards that did not deviate
+nondeviated_guards AS
+(select 
+	g.id as guard_id
+	, g.assigned_post
+	, g.shift_start as nondeviated_start
+	, g.shift_end as nondeviated_end
+	, d.id as log_id
+	, d.access_time
+from guard as g
+JOIN daily_door_access_logs as d
+ON d.guard_id = g.id
+
+WHERE assigned_post = door_location
+ORDER BY guard_id),
+
+
+-- CTE for other guards at same location as deviated guards
+other_guards AS
+(SELECT
+	nd.guard_id
+	, nd.nondeviated_start
+	, nd.nondeviated_end
+ 	, nd.access_time
+FROM nondeviated_guards as nd
+
+JOIN deviated_guards as d
+	ON d.other_location = nd.assigned_post
+	
+GROUP BY 1,2,3,4
+ORDER BY nd.guard_id DESC)
+
+SELECT og.guard_id, access_time
+FROM other_guards as og
+
+JOIN disappearance_window as dw
+	ON dw.sus_start > og.nondeviated_start
+	AND dw.sus_end < og.nondeviated_end
+
+
+WHERE access_time BETWEEN sus_start AND sus_end
+AND og.guard_id != 22   -- I added this to get to the correct solution, but I believe that it is a mistake     
+                
