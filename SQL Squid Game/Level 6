@@ -1,0 +1,89 @@
+-- query where I got stuck with nested queries > will try CTE's
+
+SELECT
+	COUNT(*) as count_incidents
+	, s.name
+	, AVG((f.failure_date - e.installation_date)) / 365.2425 as avg_lifespan_years
+	
+FROM suppliers as s
+
+JOIN equipment as e
+	ON s.id = e.supplier_id
+
+JOIN failure_incidents as f
+	ON e.id = f.failed_equipment_id
+
+WHERE game_type = 
+(SELECT game_type FROM (
+SELECT 
+	COUNT(f.id) as count_incidents
+	, e.game_type
+FROM suppliers as s
+
+JOIN equipment as e
+	ON s.id = e.supplier_id
+
+JOIN failure_incidents as f
+	ON e.id = f.failed_equipment_id
+	
+GROUP BY e.game_type, s.name
+  
+ORDER BY count_incidents DESC
+LIMIT 1))
+ 
+  GROUP BY s.name
+  ORDER BY count_incidents DESC
+  LIMIT 1
+  
+  -- trying the same thing with CTEs
+--- CTE that joins all three datasets together
+WITH full_join AS
+(SELECT *
+FROM suppliers as s
+
+	JOIN equipment as e
+		ON s.id = e.supplier_id
+
+	JOIN failure_incidents as f
+		ON e.id = f.failed_equipment_id),
+
+-- CTE that returns game_type with highest failure rate
+mostfailed_game AS
+(SELECT game_type
+ FROM full_join
+GROUP BY game_type
+ORDER BY COUNT(failed_equipment_id) DESC
+LIMIT 1
+),
+
+-- CTE that returns supplier with highest failure rate among highest game type
+mostfailed_supplier AS
+( SELECT name
+  FROM full_join as f
+ JOIN mostfailed_game as g
+ 	ON g.game_type = f.game_type
+ GROUP BY name
+ ORDER BY COUNT(failed_equipment_id) DESC
+ LIMIT 1
+),
+
+-- CTE to identify first failures
+firstfailures AS
+( SELECT MIN(failure_date) AS firstfailure, failed_equipment_id 
+FROM full_join as f
+ JOIN mostfailed_game as g
+	ON g.game_type = f.game_type
+ 
+ JOIN mostfailed_supplier as s
+ 	ON f.name = s.name
+ 
+ GROUP BY failed_equipment_id
+)
+
+SELECT ROUND(AVG((firstfailure - installation_date)/365.2425),0) as avg_lifespan
+FROM full_join as f
+
+JOIN firstfailures as ff
+ON f.failure_date = ff.firstfailure
+
+GROUP BY game_type, name

@@ -1,0 +1,17 @@
+/*Analyze the average completion times for each shape in the honeycomb game during the hottest 
+and coldest months, using data from the past 20 years only. Order the results by 
+average completion time.*/
+
+SELECT shape, month
+ , AVG(average_completion_time) as avg_completion_time
+FROM honeycomb_game as hc
+JOIN 
+	(SELECT *
+	FROM monthly_temperatures
+	WHERE avg_temperature = (SELECT MAX(avg_temperature) FROM monthly_temperatures)
+		OR avg_temperature = (SELECT MIN(avg_temperature) FROM monthly_temperatures)) as mt
+	ON EXTRACT(MONTH FROM hc.date)=mt.month
+
+WHERE date >= CURRENT_DATE - INTERVAL '20 years'
+GROUP BY shape, month
+ORDER BY avg_completion_time DESC

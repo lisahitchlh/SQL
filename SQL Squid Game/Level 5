@@ -1,0 +1,32 @@
+/* For the Marbles game, the Front Man needs you to discover who Player 456's closest companion is.
+ First, find the player who has interacted with Player 456 the most frequently in daily activities.
+  Then, confirm this player is still alive and return a row with both players' first names,
+   and the number of interactions they've had. */
+
+SELECT
+	CASE
+		WHEN di.player1_id = '456' THEN p1.first_name
+		WHEN di.player2_id = '456' THEN p2.first_name
+		ELSE NULL END as target_person
+	,CASE
+		WHEN di.player1_id = '456' THEN p2.first_name
+		WHEN di.player2_id = '456' THEN p1.first_name
+		ELSE NULL END as other_person
+	, COUNT(*) as count_interactions
+
+FROM daily_interactions di
+
+JOIN player p1 
+	ON di.player1_id = p1.id
+	
+JOIN player p2 
+	ON di.player2_id = p2.id
+
+WHERE di.player1_id = '456' OR di.player2_id = '456'
+	AND p1.status = 'alive'
+
+GROUP BY target_person, other_person
+ORDER BY COUNT(*) DESC
+LIMIT 1
+                
+                
