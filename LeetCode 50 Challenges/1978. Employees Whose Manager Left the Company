@@ -1,0 +1,18 @@
+/*
+Find the IDs of the employees whose salary is strictly less than $30000 
+and whose manager left the company. When a manager leaves the company, 
+their information is deleted from the Employees table,
+ but the reports still have their manager_id set to the manager that left.
+Return the result table ordered by employee_id.
+*/
+
+-- use subquery to create list of all employees
+-- Select Managers not in Employee List
+SELECT employee_id
+FROM Employees as e
+WHERE salary < 30000 
+    AND e.manager_id NOT IN (
+    SELECT DISTINCT(employee_id)  FROM Employees
+)
+ORDER BY employee_id ASC
+

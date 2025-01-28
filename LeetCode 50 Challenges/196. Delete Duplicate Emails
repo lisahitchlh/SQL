@@ -1,0 +1,22 @@
+/*
+Write a solution to delete all duplicate emails, 
+keeping only one unique email with the smallest id.
+
+For SQL users, please note that you are supposed to write a 
+DELETE statement and not a SELECT one.
+*/
+
+# Write your MySQL query statement below
+WITH temp AS (
+    SELECT 
+        id,
+        email,
+        ROW_NUMBER() OVER (PARTITION BY email ORDER BY id) AS row_num
+    FROM Person
+)
+DELETE FROM Person
+WHERE id IN (
+    SELECT id
+    FROM temp
+    WHERE row_num > 1
+);

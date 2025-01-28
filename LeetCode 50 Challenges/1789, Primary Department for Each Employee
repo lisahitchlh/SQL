@@ -1,0 +1,30 @@
+/*Write a solution to report all the employees with their primary department. 
+For employees who belong to one department, report their only department.*/
+
+
+-- select people with primary department flag
+WITH yes AS
+(SELECT employee_id, department_id
+FROM Employee
+WHERE primary_flag = 'Y'
+),
+
+
+-- select people without primary department flag
+nonyes AS
+(
+SELECT 
+employee_id
+, department_id
+FROM Employee
+GROUP BY employee_id
+HAVING COUNT(employee_id) = 1)
+
+
+-- union the people together
+SELECT *
+FROM yes
+
+UNION ALL
+SELECT * FROM  nonyes
+
