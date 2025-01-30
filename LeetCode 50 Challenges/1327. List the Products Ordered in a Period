@@ -1,0 +1,13 @@
+/*
+Write a solution to get the names 
+of products that have at least 100 units ordered in February 2020 and their amount.
+*/
+
+SELECT p.product_name
+, SUM(o.unit) as unit
+FROM Orders as o
+JOIN Products as p
+    ON o.product_id = p.product_id
+WHERE YEAR(order_date) = 2020 AND MONTH(order_date)=2
+GROUP BY product_name
+HAVING SUM(o.unit)>=100;
