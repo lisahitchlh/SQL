@@ -2,7 +2,7 @@
 SQL challenge solutions by Lisa Hitch
 
 ### In Progress:
-- [LeetCode 50 SQL Challenges](https://leetcode.com/studyplan/top-sql-50/): 31 out of 50 challenges
+- [LeetCode 50 SQL Challenges](https://leetcode.com/studyplan/top-sql-50/): 38 out of 50 challenges
 
 <br>
 
