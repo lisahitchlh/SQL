@@ -1,0 +1,21 @@
+/*
+Write a solution to select the product id, year, quantity, and price
+ for the first year of every product sold.
+*/
+
+WITH firstyear AS
+(
+    SELECT product_id, MIN(year) as minyear, quantity, price
+    FROM SALES
+    GROUP BY product_id
+)
+
+SELECT
+s.product_id
+, f.minyear as first_year
+,s.quantity
+,s.price
+FROM firstyear as f
+JOIN Sales as s
+    ON s.product_id = f.product_id
+        AND s.year = f.minyear

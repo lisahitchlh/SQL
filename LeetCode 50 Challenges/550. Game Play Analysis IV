@@ -1,0 +1,31 @@
+/*
+Write a solution to report the fraction of players that logged in again on the day after the day
+ they first logged in, rounded to 2 decimal places. In other words, you need to count the number of
+  players that logged in for at least two consecutive days starting from their first login date, 
+  then divide that number by the total number of players.
+*/
+
+WITH firstlogin AS
+(
+    SELECT player_id, MIN(event_date) as mindate
+    FROM Activity
+    GROUP BY player_id
+),
+
+loggedin AS
+(SELECT 
+    f.player_id
+    ,f.mindate
+    ,MAX(CASE WHEN a.event_date = DATE_ADD(f.mindate, INTERVAL 1 DAY) THEN 1 ELSE 0 END) AS loggedagain
+
+FROM firstlogin as f
+LEFT JOIN Activity as a
+    ON f.player_id = a.player_id
+    AND a.event_date > f.mindate
+GROUP BY f.player_id, f.mindate
+
+)
+
+SELECT
+ROUND(SUM(loggedagain) / COUNT(loggedagain),2) as fraction
+FROM loggedin

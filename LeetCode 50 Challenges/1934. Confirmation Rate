@@ -1,0 +1,43 @@
+/*
+The confirmation rate of a user is the number of 'confirmed' messages divided by the total 
+number of requested confirmation messages. The confirmation rate of a user that 
+did not request any confirmation messages is 0. Round the confirmation rate to
+two decimal places.
+Write a solution to find the confirmation rate of each user.
+*/
+
+# Write your MySQL query statement below
+WITH signedusers AS
+(
+    SELECT DISTINCT(user_id) as signedusers FROM Signups
+)
+,
+
+confirmed AS
+(
+    SELECT 
+    user_id
+    ,COUNT(user_id) as confirmedcount
+    FROM Confirmations
+    WHERE action = 'confirmed'
+    GROUP BY user_id
+),
+
+allusers AS 
+(
+    SELECT 
+    user_id
+    ,COUNT(user_id) as allcount
+    FROM Confirmations
+    GROUP BY user_id
+)
+
+SELECT signedusers as user_id
+, ROUND(CASE WHEN ISNULL(COALESCE(confirmedcount,0)/COALESCE(allcount,0)) THEN 0 ELSE (COALESCE(confirmedcount,0)/COALESCE(allcount,0)) END,2)  as confirmation_rate
+FROM signedusers as s
+LEFT JOIN confirmed as c
+    ON s.signedusers = c.user_id
+LEFT JOIN allusers as a
+    ON s.signedusers = a.user_id
+
+ORDER BY user_id DESC, confirmation_rate
