@@ -1,0 +1,16 @@
+-- Find all numbers that appear at least three times consecutively.
+
+WITH prev AS
+(
+    SELECT
+        num
+        , LAG (num,1) OVER (ORDER BY id) AS prev
+        , LAG (num,2) OVER (ORDER BY id) AS preprevious
+        FROM Logs
+)
+
+SELECT DISTINCT(num) AS ConsecutiveNums
+FROM prev
+WHERE num=prev
+AND prev=preprevious
+AND num = preprevious
