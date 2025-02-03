@@ -1,0 +1,31 @@
+/*
+Write a solution to swap the seat id of every two consecutive students.
+ If the number of students is odd, the id of the last student is not swapped.
+
+Return the result table ordered by id in ascending order.
+*/
+
+WITH totalcount as
+(
+    SELECT COUNT(DISTINCT(id)) as total_ids FROM Seat 
+),
+
+prep AS
+(
+SELECT 
+id
+, student
+, CASE 
+    WHEN MOD(id,2) = 0 THEN id-1 
+    WHEN MOD(id,2) = 1 AND id != total_ids THEN id+1
+    ELSE id END AS new_id
+FROM Seat
+CROSS JOIN totalcount
+
+)
+
+SELECT
+new_id as id
+, student
+FROM prep
+ORDER BY id ASC
