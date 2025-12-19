@@ -1,0 +1,36 @@
+-- The North Pole Network wants to see who's the most active in the holiday chat each day. 
+-- Write a query to count how many messages each user sent, then find the most active user(s) each day. 
+-- If multiple users tie for first place, return all of them.
+
+
+WITH messages AS
+
+(SELECT sender_id
+  , COUNT(message_id) as count_messages
+  , DATE(sent_at) as sent_at
+  FROM npn_messages
+  GROUP BY sent_at, sender_id),
+
+  counted AS (
+SELECT SUM(count_messages) as num_messages
+  , sender_id
+  , sent_at
+  FROM messages
+GROUP BY sender_id, sent_at
+ORDER BY num_messages DESC),
+
+  rownums as (
+SELECT 
+  ROW_NUMBER() OVER
+  (PARTITION BY sent_at ORDER BY num_messages DESC) as row_num
+  , num_messages
+  , sender_id
+  , sent_at
+  FROM counted)
+
+SELECT user_name, sent_at, num_messages
+  FROM rownums
+  JOIN npn_users as u
+  ON u.user_id = rownums.sender_id
+WHERE row_num = 1
+ORDER BY num_messages DESC

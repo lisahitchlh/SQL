@@ -1,0 +1,13 @@
+-- Buddy is planning a winter getaway and wants to rank ski resorts by annual snowfall. 
+-- Can you help him bucket these ski resorts into quartiles?
+
+
+WITH total_inches as
+(SELECT resort_name
+  , SUM(snowfall_inches) as total_inches
+FROM resort_monthly_snowfall
+  GROUP BY resort_name)
+
+SELECT resort_name,
+NTILE(4) OVER (ORDER BY total_inches) as quartile
+FROM total_inches

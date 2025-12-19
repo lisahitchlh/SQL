@@ -1,0 +1,14 @@
+-- The Grinch is tracking his daily mischief scores to see how his behavior changes over time. 
+-- Can you find how many points his score increased or decreased each day compared to the previous day?
+
+
+WITH lagged as 
+  (SELECT log_date
+  , mischief_score
+  , LAG(mischief_score, 1,NULL) OVER (ORDER BY Date(log_date))as difference_score
+FROM grinch_mischief_log)
+
+  SELECT 
+  log_date
+  , mischief_score - difference_score as difference
+  FROM lagged
