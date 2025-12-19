@@ -1,0 +1,20 @@
+-- Over the 12 days of her data challenge, Data Dawn tracked her daily quiz scores across different subjects. 
+-- Can you find each subject's first and last recorded score to see how much she improved?
+
+WITH dates AS
+(SELECT 
+  MAX(quiz_date)  as lastdate
+, MIN(quiz_date)  as firstdate
+, subject
+, score
+FROM daily_quiz_scores
+GROUP BY subject),
+
+  joined AS
+(SELECT * FROM daily_quiz_scores
+  JOIN dates
+  ON dates.subject = daily_quiz_scores.subject)
+
+SELECT 
+  subject, quiz_date, score  FROM joined
+WHERE quiz_date = firstdate OR quiz_date = lastdate
