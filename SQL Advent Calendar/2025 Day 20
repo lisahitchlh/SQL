@@ -1,0 +1,26 @@
+-- Jack Frost wants to review all the cocoa breaks he actually took
+-- including the cocoa type and the location he drank it in. 
+-- How would you combine the necessary tables to show each logged break with its matching cocoa details and location?
+
+
+WITH logbreak AS
+(SELECT * 
+  FROM cocoa_logs as c
+  JOIN break_schedule as b
+  ON c.break_id = b.break_id
+),
+
+logloc AS
+(SELECT *
+  FROM logbreak as b
+  JOIN locations as l
+  ON b.location_id = l.location_id),
+
+logtypes AS
+(SELECT * 
+  FROM logloc as l 
+  JOIN cocoa_types as c
+  ON l.cocoa_id = c.cocoa_id 
+)
+
+SELECT * FROM logtypes
