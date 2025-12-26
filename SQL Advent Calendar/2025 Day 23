@@ -1,0 +1,13 @@
+-- The Gingerbread House Competition wants to feature the builders who used at least 4 distinct candy types in their designs. 
+-- How would you identify these builders?
+
+WITH counttypes AS (
+SELECT COUNT(DISTINCT(candy_type)) as count_type
+  , builder_name
+FROM gingerbread_designs
+GROUP BY builder_name)
+
+SELECT * 
+FROM counttypes
+WHERE count_type >= 4
+ORDER BY count_type DESC
