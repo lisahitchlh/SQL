@@ -1,0 +1,15 @@
+-- Write a solution to find the first login date for each player.
+
+WITH cte as(    
+    SELECT player_id
+        , MIN(event_date) as first_login
+    FROM Activity 
+    GROUP BY 1)
+
+SELECT a.player_id
+    , first_login
+FROM Activity as a
+JOIN cte as c
+    ON a.player_id=c.player_id
+
+WHERE first_login = event_date

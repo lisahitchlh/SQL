@@ -1,0 +1,26 @@
+-- 3 tables: SalesPerson, Company, Orders
+-- Write a solution to find the names of all the salespersons 
+-- who did not have any orders related to the company with the name "RED".
+
+WITH orders_red AS
+(
+    SELECT o.order_id, o.com_id, o.sales_id
+    FROM Orders as o 
+    JOIN Company as c
+        ON o.com_id = c.com_id
+    WHERE c.name = "RED"
+), 
+
+orders_red_salesp AS
+(
+    SELECT sp.sales_id
+    FROM orders_red as orr
+    JOIN SalesPerson as sp
+        ON orr.sales_id = sp.sales_id
+)
+
+SELECT sp.name
+FROM SalesPerson as sp
+LEFT JOIN orders_red_salesp as ors
+    ON sp.sales_id = ors.sales_id
+WHERE ISNULL(ors.sales_id)
