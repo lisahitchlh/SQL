@@ -10,5 +10,5 @@ SQL challenge solutions by Lisa Hitch
 
 ### Completed Challenges
 
-✅ [SQL Squid Game](https://datalemur.com/sql-game): 9 out of 9 Levels
+✅ [SQL Squid Game](https://datalemur.com/sql-game): 9 out of 9 Levels<br>
 ✅ [SQL Advent Calendar 2025](https://interviewmaster.ai/advent): 24 out of 24 challenges
