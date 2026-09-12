@@ -1,0 +1,26 @@
+/*
+Write a solution to report the name and balance of users with a balance 
+higher than 10000. The balance of an account is equal to the sum of the 
+amounts of all transactions involving that account.
+*/
+
+--my solution
+with accounts as 
+(SELECT 
+    account
+    , SUM(amount) as balance
+FROM Transactions
+GROUP BY 1
+HAVING balance > 10000)
+
+SELECT name, balance
+FROM accounts as a
+JOIN Users as u
+    on a.account = u.account
+
+--more efficient solution
+select name, sum(amount) as balance
+from Users inner join Transactions
+on Users.account = Transactions.account
+group by name
+having balance > 10000

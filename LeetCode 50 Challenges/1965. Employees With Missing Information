@@ -1,0 +1,44 @@
+/*
+Write a solution to report the IDs of all the employees with missing information. 
+The information of an employee is missing if:
+The employee's name is missing, or
+The employee's salary is missing.
+*/
+
+-- using nested queries: 102ms runtime
+
+(SELECT e.employee_ID
+FROM Employees as e
+LEFT JOIN Salaries as s
+    ON e.employee_id = s.employee_id
+WHERE ISNULL(salary))
+
+UNION
+
+(SELECT s.employee_ID
+FROM Employees as e
+RIGHT JOIN Salaries as s
+    ON e.employee_id = s.employee_id
+WHERE ISNULL(name))
+
+ORDER BY employee_id ASC
+
+-- using CTEs, 109ms runtime
+with leftjoin as 
+(SELECT e.employee_ID
+FROM Employees as e
+LEFT JOIN Salaries as s
+    ON e.employee_id = s.employee_id
+WHERE ISNULL(salary)),
+
+rightjoin as
+(SELECT s.employee_ID
+FROM Employees as e
+RIGHT JOIN Salaries as s
+    ON e.employee_id = s.employee_id
+WHERE ISNULL(name))
+
+SELECT * FROM leftjoin
+UNION
+SELECT * FROM rightjoin
+ORDER BY employee_id ASC
