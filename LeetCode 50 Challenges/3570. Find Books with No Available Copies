@@ -1,0 +1,29 @@
+/*
+Write a solution to find all books that are currently borrowed (not returned) 
+and have zero copies available in the library.
+
+A book is considered currently borrowed if there exists a borrowing record 
+with a NULL return_date
+*/
+
+with borrow as
+(
+    SELECT book_id
+        , COUNT(book_id) as current_borrowers
+    FROM borrowing_records
+    WHERE ISNULL(return_date)
+    GROUP BY book_id
+)
+
+SELECT
+    b.book_id
+    , title
+    , author
+    , genre
+    , publication_year
+    , b. current_borrowers
+FROM library_books as lb
+JOIN borrow as b
+    ON lb.book_id = b.book_id
+WHERE b.current_borrowers - lb.total_copies = 0
+ORDER BY current_borrowers DESC, title ASC
