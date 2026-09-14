@@ -1,0 +1,39 @@
+/* 
+Write a solution to find employees 
+who have the highest salary in each of the departments.
+*/
+
+--my solution
+with joined as
+(
+    SELECT 
+        e.id as employee_id
+        , e.name as employee_name
+        , salary 
+        , d.id  as department_id
+        , d.name as department_name
+        , dense_rank() OVER (PARTITION BY department_id order by salary DESC) as rank_
+        FROM Employee as e
+    JOIN Department as d
+    ON e.departmentId = d.id
+)
+
+SELECT
+    department_name as Department
+    , employee_name as Employee
+    ,salary as Salary
+FROM joined
+WHERE rank_ = 1
+
+-- more efficient
+SELECT
+    d.name as Department
+    , e.name as Employee
+    , e.salary as Salary
+FROM Employee as e
+JOIN Department as d ON e.departmentId = d.id
+WHERE e.salary = (
+    SELECT MAX(salary)
+    FROM Employee
+    WHERE departmentId = e.departmentId
+)
