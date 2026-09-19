@@ -1,0 +1,40 @@
+/*
+
+Write a solution to find employees who are meeting-heavy - 
+employees who spend more than 50% of their working time in meetings 
+during any given week.
+
+Assume a standard work week is 40 hours
+Calculate total meeting hours per employee per week (Monday to Sunday)
+An employee is meeting-heavy if their weekly meeting hours > 20 hours 
+(50% of 40 hours)
+Count how many weeks each employee was meeting-heavy
+Only include employees who were meeting-heavy for at least 2 weeks
+Return the result table ordered by the number of meeting-heavy weeks 
+in descending order, then by employee name in ascending order.
+
+*/
+
+with meetingheavy as(
+SELECT 
+    employee_id
+    , YEARWEEK(meeting_date, 1) as weekdate
+    , COUNT(meeting_id)
+    , SUM(duration_hours)
+    , CASE WHEN SUM(duration_hours) > 20 THEN 'meeting heavy' ELSE NULL END as meetingheavy
+FROM meetings
+GROUP by weekdate, employee_id
+ORDER BY 1,2)
+
+SELECT
+    m. employee_id
+    , employee_name
+    , department
+    , COUNT(meetingheavy) AS meeting_heavy_weeks
+FROM meetingheavy as m
+JOIN employees as e
+    ON m.employee_id = e.employee_id
+WHERE meetingheavy = 'meeting heavy'
+GROUP BY employee_id
+HAVING meeting_heavy_weeks >= 2
+ORDER BY meeting_heavy_weeks DESC, employee_name ASC

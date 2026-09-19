@@ -1,0 +1,43 @@
+/* Write a solution to find loyal customers. 
+A customer is considered loyal if they meet ALL the following criteria:
+
+Made at least 3 purchase transactions.
+Have been active for at least 30 days.
+Their refund rate is less than 20% .
+Refund rate is the proportion of transactions that are refunds, 
+calculated as the number of refund transactions divided by the 
+total number of transactions (purchases plus refunds).
+
+Return the result table ordered by customer_id in ascending order. */
+
+-- find customers who made at least 3 purchases
+WITH three as
+(SELECT
+    customer_id
+FROM customer_transactions
+GROUP BY customer_id
+HAVING COUNT(transaction_id) >= 3),
+
+-- find customers who have been active for at least 30 days
+thirty as
+(SELECT 
+    customer_ID
+FROM customer_transactions
+GROUP BY customer_id
+HAVING DATEDIFF(MAX(transaction_Date), MIN(transaction_date)) >= 30),
+
+-- calculate refund rate per customer and filter if larger than 20%
+refundrate as
+(SELECT   
+    customer_id
+FROM customer_transactions
+GROUP BY customer_id
+HAVING (SUM(CASE WHEN transaction_type = 'refund' THEN 1 ELSE 0 END) / COUNT(transaction_id)) < 0.2)
+
+-- Join all those conditions together
+SELECT three.customer_id
+FROM three
+JOIN thirty
+    ON three.customer_id = thirty.customer_id
+JOIN refundrate
+    ON three.customer_id = refundrate.customer_id

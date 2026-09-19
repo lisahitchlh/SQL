@@ -1,0 +1,12 @@
+-- Write a solution to find for each user, 
+the join date and the number of orders they made as a buyer in 2019.
+
+SELECT
+    u.user_id as buyer_id
+    , u.join_date
+    , SUM(CASE WHEN YEAR(o.order_date) = 2019 THEN 1 ELSE 0 END) as orders_in_2019
+FROM Users as u
+LEFT JOIN Orders as o
+    ON o.buyer_id = u.user_id
+GROUP BY 1
+ORDER BY 1 ASC

@@ -1,0 +1,31 @@
+/* Each node in the tree can be one of three types:
+
+"Leaf": if the node is a leaf node.
+"Root": if the node is the root of the tree.
+"Inner": If the node is neither a leaf node nor a root node.
+Write a solution to report the type of each node in the tree. */
+
+/* 
+root: parent_id ISNULL and count(parent_id = 1) is > 1
+inner: id has a parent_id and it also appears as a parent_id further down
+leaf: it has a parent id but it doesn't appear in p_id */
+-- count how many children a parent has
+WITH children as(
+SELECT
+p_id,
+COUNT(p_id) as num_children
+FROM Tree
+GROUP BY p_id)
+
+-- join children data on original data
+-- if parent-Id is null then Root, if an id has no children, then Lead, else Inner
+SELECT
+    id
+    , CASE 
+        WHEN ISNULL(t.p_id) THEN 'Root'
+        WHEN ISNULL(num_children) THEN 'Leaf'
+        ELSE 'Inner'
+        END as 'type'
+FROM Tree as t 
+LEFT JOIN children as c
+    ON t.id = c.p_id
