@@ -1,0 +1,48 @@
+/*
+Write a solution to find the most popular product category 
+for each season. The seasons are defined as:
+
+Winter: December, January, February
+Spring: March, April, May
+Summer: June, July, August
+Fall: September, October, November
+The popularity of a category is determined by the total quantity 
+sold in that season. If there is a tie, select the category with 
+the highest total revenue (quantity × price). If there is still a tie, 
+return the lexicographically smaller category.
+
+Return the result table ordered by season in ascending order.
+
+*/
+
+with products as (
+SELECT 
+        CASE 
+        WHEN MONTH(sale_date) IN (12,1,2) THEN 'Winter' 
+        WHEN MONTH(sale_date) IN (3,4,5) THEN 'Spring'
+        WHEN MONTH(sale_date) IN (6,7,8) THEN 'Summer' 
+        WHEN MONTH(sale_date) IN (9,10,11) THEN 'Fall'
+        END as season
+        , SUM(quantity) as quantity
+        , SUM(price) as price
+        , SUM(quantity * price) as revenue
+        , category
+FROM sales as s
+JOIN products as p 
+    ON s.product_id = p.product_id
+GROUP BY season, category), 
+
+ranked as (
+    SELECT
+        season
+        , category
+        , quantity as total_quantity
+        , revenue as total_revenue
+        , ROW_NUMBER() OVER (PARTITION BY season ORDER BY quantity DESC, revenue DESC, category ASC) as rn
+    FROM products
+)
+
+SELECT season, category, total_quantity, total_revenue
+FROM ranked
+WHERE rn = 1
+ORDER BY season ASC
