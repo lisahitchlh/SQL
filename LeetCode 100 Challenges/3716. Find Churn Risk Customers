@@ -1,0 +1,46 @@
+/*
+Write a solution to Find Churn Risk Customers - 
+users who show warning signs before churning. 
+A user is considered churn risk customer if they meet ALL the 
+following criteria:
+
+Currently have an active subscription (their last event is not cancel).
+Have performed at least one downgrade in their subscription history.
+Their current plan revenue is less than 50% of their historical maximum plan revenue.
+Have been a subscriber for at least 60 days.
+Return the result table ordered by days_as_subscriber in descending order, 
+then by user_id in ascending order.
+*/
+
+with rownumber as (
+    SELECT 
+    * 
+    , ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY event_date DESC, event_id DESC) as rn
+    FROM subscription_events
+),
+
+info as (
+SELECT 
+    user_id
+    , CASE WHEN rn=1 THEN plan_name END as current_plan
+    , CASE WHEN rn=1 THEN event_type END as current_event
+    , CASE WHEN rn=1 THEN monthly_amount END as current_monthly_amount
+    , MAX(monthly_amount) OVER (PARTITION BY user_id) as max_historical_amount
+    , DATEDIFF(MAX(event_date) OVER (PARTITION BY user_id), MIN(event_date) OVER (PARTITION BY user_id)) as datediffdays
+    , SUM(CASE WHEN event_type = 'downgrade' THEN 1 ELSE 0 END) OVER (PARTITION BY user_id) as countdowngrade
+FROM rownumber)
+
+
+SELECT
+    user_id
+    , MAX(current_plan) as current_plan
+    , MAX(current_monthly_amount) as current_monthly_amount
+    , MAX(max_historical_amount) as max_historical_amount
+    , datediffdays as days_as_subscriber
+FROM info
+WHERE current_event != 'cancel' AND countdowngrade >= 1 AND datediffdays >= 60
+    AND current_monthly_amount / max_historical_amount < 0.5
+GROUP BY user_id
+ORDER BY days_as_subscriber DESC, user_id ASC
+
+
